@@ -148,6 +148,8 @@ function SessionContent() {
   };
 
   const handleReset = () => router.push("/");
+  const handleShowGames = () => dispatch({ type: "SHOW_RESULT" });
+  const handleBackToQuestions = () => dispatch({ type: "BACK_TO_QUESTIONS" });
 
   if (state.status === "error") {
     return (
@@ -174,7 +176,7 @@ function SessionContent() {
     const sorted = [...state.remaining].sort(
       (a, b) => (b.communityRating ?? 0) - (a.communityRating ?? 0)
     );
-    return <ResultScreen games={sorted} onReset={handleReset} />;
+    return <ResultScreen games={sorted} onReset={handleReset} onBackToQuestions={handleBackToQuestions} />;
   }
 
   if (state.status === "questioning") {
@@ -209,6 +211,7 @@ function SessionContent() {
         question={question}
         remaining={state.remaining.length}
         onAnswer={handleAnswer}
+        onShowGames={handleShowGames}
       />
     );
   }

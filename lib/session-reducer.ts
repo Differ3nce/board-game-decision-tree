@@ -58,6 +58,9 @@ export function sessionReducer(
     case "SHOW_RESULT":
       return { ...state, status: "result" };
 
+    case "BACK_TO_QUESTIONS":
+      return { ...state, status: "questioning" };
+
     case "SET_ERROR":
       return { ...state, status: "error", error: action.error, loadingProgress: null };
 
