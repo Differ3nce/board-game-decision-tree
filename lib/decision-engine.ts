@@ -43,6 +43,16 @@ function questionScore(q: Question, games: Game[]): number {
     return best;
   }
 
+  // Multi-mechanic: use average split score across included mechanics
+  if (q.type === "mechanic-multi") {
+    if (q.options.length === 0) return 0;
+    const total = q.options.reduce((sum, opt) => {
+      const filtered = applyFilter(games, "mechanic", opt.value);
+      return sum + splitScore(filtered.length, games.length);
+    }, 0);
+    return total / q.options.length;
+  }
+
   return q.options.reduce((best, opt) => {
     if (opt.value.startsWith("__skip__")) return best;
     const filtered = applyOptionFilter(games, q.dimension, opt.value);
@@ -148,7 +158,9 @@ function buildAgeRestrictionQuestion(games: Game[]): Question | null {
   };
 }
 
-function buildMechanicQuestion(games: Game[], skipMechanics: Set<string>): Question | null {
+const MECHANIC_MULTI_COUNT = 5;
+
+function buildMultiMechanicQuestion(games: Game[]): Question | null {
   const mechanicCounts = new Map<string, number>();
   games.forEach((g) =>
     g.mechanics.forEach((m) => {
@@ -156,29 +168,22 @@ function buildMechanicQuestion(games: Game[], skipMechanics: Set<string>): Quest
     })
   );
 
-  let bestMechanic: string | null = null;
-  let bestScore = -1;
-
+  const scored: Array<{ mechanic: string; score: number }> = [];
   mechanicCounts.forEach((count, mechanic) => {
-    if (skipMechanics.has(mechanic)) return;
-    if (count === games.length) return; // all remaining games have it — useless filter
-    const score = splitScore(count, games.length);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMechanic = mechanic;
-    }
+    if (count === games.length) return; // all games have it — useless filter
+    scored.push({ mechanic, score: splitScore(count, games.length) });
   });
 
-  if (!bestMechanic) return null;
+  scored.sort((a, b) => b.score - a.score);
+  const top = scored.slice(0, MECHANIC_MULTI_COUNT);
+
+  if (top.length < 2) return null;
 
   return {
     dimension: "mechanic",
-    text: `Are you in the mood for a game with "${bestMechanic}"?`,
-    options: [
-      { label: "Yes, love it! 👍", value: bestMechanic },
-      { label: "No preference", value: `__skip__:${bestMechanic}` },
-      { label: "No, I hate it! 👎", value: `__exclude__:${bestMechanic}` },
-    ],
+    text: "Do you love or hate any of these mechanics?",
+    options: top.map(({ mechanic }) => ({ label: mechanic, value: mechanic })),
+    type: "mechanic-multi",
   };
 }
 
@@ -258,10 +263,7 @@ export function getNextQuestion(
     return buildPlayerCountQuestion(games);
   }
 
-  // Mechanics/categories already offered (yes, skip, or exclude), to avoid repeating
-  const askedMechanics = new Set(
-    answers.filter((a) => a.dimension === "mechanic").map((a) => extractValue(a.value))
-  );
+  // Categories already offered, to avoid repeating
   const askedCategories = new Set(
     answers.filter((a) => a.dimension === "category").map((a) => extractValue(a.value))
   );
@@ -285,10 +287,13 @@ export function getNextQuestion(
     if (q) candidates.push({ question: q, score: questionScore(q, games) });
   }
 
-  // Mechanic and category can be asked repeatedly with different values
-  const mechanicQ = buildMechanicQuestion(games, askedMechanics);
-  if (mechanicQ) candidates.push({ question: mechanicQ, score: questionScore(mechanicQ, games) });
+  // Mechanic is asked once as a multi-select question
+  if (!askedDimensions.has("mechanic")) {
+    const q = buildMultiMechanicQuestion(games);
+    if (q) candidates.push({ question: q, score: questionScore(q, games) });
+  }
 
+  // Category can still be asked repeatedly with different values
   const categoryQ = buildCategoryQuestion(games, askedCategories);
   if (categoryQ) candidates.push({ question: categoryQ, score: questionScore(categoryQ, games) });
 

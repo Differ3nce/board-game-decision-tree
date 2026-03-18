@@ -39,15 +39,17 @@ export function sessionReducer(
 
     case "ANSWER_GIVEN": {
       const newAsked = new Set(state.askedDimensions);
-      // mechanic/category are tracked via answers and can repeat; don't block them via askedDimensions
-      if (action.answer.dimension !== "mechanic" && action.answer.dimension !== "category") {
-        newAsked.add(action.answer.dimension);
+      // category can repeat; all other dimensions (including mechanic) are asked once
+      for (const answer of action.answers) {
+        if (answer.dimension !== "category") {
+          newAsked.add(answer.dimension);
+        }
       }
       const shouldEnd = action.remaining.length <= RESULT_THRESHOLD;
       return {
         ...state,
         remaining: action.remaining,
-        answers: [...state.answers, action.answer],
+        answers: [...state.answers, ...action.answers],
         askedDimensions: newAsked,
         status: shouldEnd ? "result" : "questioning",
       };

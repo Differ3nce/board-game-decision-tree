@@ -62,7 +62,7 @@ export interface Question {
   dimension: QuestionDimension;
   text: string;
   options: QuestionOption[];
-  type?: "choice" | "slider";
+  type?: "choice" | "slider" | "mechanic-multi";
   sliderConfig?: SliderConfig;
 }
 
@@ -101,7 +101,7 @@ export type SessionAction =
   | { type: "START_LOADING"; username: string }
   | { type: "SET_LOADING_PROGRESS"; progress: LoadingProgress }
   | { type: "COLLECTION_LOADED"; games: Game[] }
-  | { type: "ANSWER_GIVEN"; answer: Answer; remaining: Game[] }
+  | { type: "ANSWER_GIVEN"; answers: Answer[]; remaining: Game[] }
   | { type: "SHOW_RESULT" }
   | { type: "SET_ERROR"; error: string }
   | { type: "RESET" };
