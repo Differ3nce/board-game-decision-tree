@@ -77,19 +77,25 @@ function SkipFooter({
   dimension,
   onAnswer,
   onShowGames,
+  hideSkip = false,
 }: {
   dimension: QuestionDimension;
   onAnswer: (answers: Answer[]) => void;
   onShowGames: () => void;
+  hideSkip?: boolean;
 }) {
   return (
     <div className="flex justify-between items-center pt-1">
-      <button
-        onClick={() => onAnswer([{ dimension, value: "__skip__" }])}
-        className="text-sm text-ink/50 hover:text-ink/80 transition-colors"
-      >
-        No preference
-      </button>
+      {!hideSkip ? (
+        <button
+          onClick={() => onAnswer([{ dimension, value: "__skip__" }])}
+          className="text-sm text-ink/50 hover:text-ink/80 transition-colors"
+        >
+          No preference
+        </button>
+      ) : (
+        <span />
+      )}
       <button
         onClick={onShowGames}
         className="text-sm text-wood-600 hover:text-wood-800 font-medium transition-colors"
@@ -218,6 +224,7 @@ export default function QuestionCard({ question, remaining, onAnswer, onShowGame
                 dimension={question.dimension}
                 onAnswer={onAnswer}
                 onShowGames={onShowGames}
+                hideSkip={question.options.some((o) => o.value.startsWith("__skip__"))}
               />
             </div>
           )}

@@ -191,7 +191,7 @@ function SessionContent() {
         <OfferStopCard
           remaining={remaining.length}
           onShowResults={() => dispatch({ type: "SHOW_RESULT" })}
-          onKeepGoing={() => setKeepGoingThreshold(remaining.length - 1)}
+          onKeepGoing={() => setKeepGoingThreshold(remaining.length)}
         />
       );
     }
