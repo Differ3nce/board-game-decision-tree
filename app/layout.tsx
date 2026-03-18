@@ -13,15 +13,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        <div className="pb-14">{children}</div>
-        <footer className="fixed bottom-3 right-3 z-10">
+      <body className="antialiased flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col">{children}</div>
+        <footer className="flex justify-center py-4">
           <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/powered-by-bgg-rgb.svg"
               alt="Powered by BoardGameGeek"
-              className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity"
+              className="h-8 w-auto opacity-60 hover:opacity-100 transition-opacity"
             />
           </a>
         </footer>

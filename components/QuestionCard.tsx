@@ -186,7 +186,7 @@ function MultiMechanicQuestion({
 
 export default function QuestionCard({ question, remaining, onAnswer, onShowGames }: Props) {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream">
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-cream">
       <AnimatePresence mode="wait">
         <motion.div
           key={question.dimension + question.text}

@@ -153,7 +153,7 @@ function SessionContent() {
 
   if (state.status === "error") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 bg-cream">
         <div className="max-w-md text-center space-y-4">
           <h2 className="text-2xl font-bold text-wood-800">Something went wrong</h2>
           <p className="text-ink">{state.error}</p>
