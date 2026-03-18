@@ -63,7 +63,7 @@ export default function UsernameForm() {
       return;
     }
     setError("");
-    router.push(`/session?username=${encodeURIComponent(allUsers.join(","))}`);
+    router.push(`/session?username=${allUsers.map(encodeURIComponent).join(",")}`);
   };
 
   const handleRefreshCache = (username: string, e: React.MouseEvent) => {
@@ -79,7 +79,7 @@ export default function UsernameForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
+    <form action="/session" onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
       <div className="space-y-2">
         <label
           htmlFor="username"
@@ -114,6 +114,7 @@ export default function UsernameForm() {
         <div className="flex gap-2">
           <input
             id="username"
+            name="username"
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
