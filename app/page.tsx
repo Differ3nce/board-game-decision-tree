@@ -2,7 +2,7 @@ import UsernameForm from "@/components/UsernameForm";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream">
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-cream">
       <div className="w-full max-w-md space-y-8 text-center">
         <div className="space-y-3">
           <div className="text-6xl select-none">🎲</div>

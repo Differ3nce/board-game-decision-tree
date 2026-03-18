@@ -13,8 +13,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        {children}
+      <body className="antialiased flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col">{children}</div>
         <footer className="flex justify-center py-4">
           <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
             {/* eslint-disable-next-line @next/next/no-img-element */}

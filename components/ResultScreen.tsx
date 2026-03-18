@@ -11,7 +11,7 @@ export default function ResultScreen({ games, onReset, onBackToQuestions }: Prop
   const isSingle = games.length === 1;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream">
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-cream">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-2">
           <div className="text-5xl">{isSingle ? "🎉" : "🎲"}</div>

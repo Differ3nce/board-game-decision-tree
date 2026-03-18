@@ -10,7 +10,7 @@ interface Props {
 
 export default function OfferStopCard({ remaining, onShowResults, onKeepGoing }: Props) {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream">
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-cream">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
