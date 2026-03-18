@@ -5,7 +5,6 @@ export default function Home() {
     <main className="flex-1 flex flex-col items-center justify-center p-6 bg-cream">
       <div className="w-full max-w-md space-y-8 text-center">
         <div className="space-y-3">
-          <div className="text-6xl select-none">🎲</div>
           <h1 className="text-4xl font-bold text-wood-800 leading-tight">
             What Should We Play?
           </h1>

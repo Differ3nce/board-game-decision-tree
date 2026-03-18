@@ -14,6 +14,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased flex flex-col min-h-screen">
+        <header className="flex justify-center pt-4 pb-1">
+          <a href="/" aria-label="Go to home" className="text-3xl hover:scale-110 transition-transform select-none">
+            🎲
+          </a>
+        </header>
         <div className="flex-1 flex flex-col">{children}</div>
         <footer className="flex justify-center py-4">
           <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
