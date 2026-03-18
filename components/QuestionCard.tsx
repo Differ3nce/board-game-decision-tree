@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Question, QuestionDimension } from "@/types/game";
+import type { Answer, Question, QuestionDimension } from "@/types/game";
 
 interface Props {
   question: Question;
   remaining: number;
-  onAnswer: (dimension: QuestionDimension, value: string) => void;
+  onAnswer: (answers: Answer[]) => void;
 }
 
 function formatMinutes(min: number): string {
@@ -23,7 +23,7 @@ function SliderQuestion({
   onAnswer,
 }: {
   question: Question;
-  onAnswer: (dimension: QuestionDimension, value: string) => void;
+  onAnswer: (answers: Answer[]) => void;
 }) {
   const cfg = question.sliderConfig!;
   const [value, setValue] = useState(cfg.defaultValue);
@@ -56,10 +56,81 @@ function SliderQuestion({
       </div>
 
       <button
-        onClick={() => onAnswer(question.dimension, String(value))}
+        onClick={() => onAnswer([{ dimension: question.dimension, value: String(value) }])}
         className="w-full py-4 px-5 rounded-xl bg-wood-600 text-cream font-semibold text-lg hover:bg-wood-800 transition-all shadow-sm"
       >
         That works for me!
+      </button>
+    </div>
+  );
+}
+
+function MultiMechanicQuestion({
+  question,
+  onAnswer,
+}: {
+  question: Question;
+  onAnswer: (answers: Answer[]) => void;
+}) {
+  const [selections, setSelections] = useState<Record<string, "love" | "hate" | null>>({});
+
+  const toggle = (mechanic: string, sentiment: "love" | "hate") => {
+    setSelections((prev) => ({
+      ...prev,
+      [mechanic]: prev[mechanic] === sentiment ? null : sentiment,
+    }));
+  };
+
+  const handleSubmit = () => {
+    const answers: Answer[] = [];
+    for (const [mechanic, sentiment] of Object.entries(selections)) {
+      if (sentiment === "love") answers.push({ dimension: "mechanic", value: mechanic });
+      if (sentiment === "hate") answers.push({ dimension: "mechanic", value: `__exclude__:${mechanic}` });
+    }
+    // Always dispatch at least a skip so the dimension is marked as asked
+    onAnswer(answers.length > 0 ? answers : [{ dimension: "mechanic", value: "__skip__" }]);
+  };
+
+  return (
+    <div className="space-y-3">
+      {question.options.map((opt) => {
+        const sel = selections[opt.value] ?? null;
+        return (
+          <div
+            key={opt.value}
+            className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 border-wood-400/30 bg-cream"
+          >
+            <span className="font-medium text-ink">{opt.label}</span>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={() => toggle(opt.value, "love")}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  sel === "love"
+                    ? "bg-green-600 text-white"
+                    : "bg-wood-400/20 text-ink hover:bg-green-100"
+                }`}
+              >
+                👍 Love
+              </button>
+              <button
+                onClick={() => toggle(opt.value, "hate")}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  sel === "hate"
+                    ? "bg-red-500 text-white"
+                    : "bg-wood-400/20 text-ink hover:bg-red-100"
+                }`}
+              >
+                👎 Hate
+              </button>
+            </div>
+          </div>
+        );
+      })}
+      <button
+        onClick={handleSubmit}
+        className="w-full py-4 px-5 rounded-xl bg-wood-600 text-cream font-semibold text-lg hover:bg-wood-800 transition-all shadow-sm mt-2"
+      >
+        Continue
       </button>
     </div>
   );
@@ -88,12 +159,14 @@ export default function QuestionCard({ question, remaining, onAnswer }: Props) {
 
           {question.type === "slider" ? (
             <SliderQuestion question={question} onAnswer={onAnswer} />
+          ) : question.type === "mechanic-multi" ? (
+            <MultiMechanicQuestion question={question} onAnswer={onAnswer} />
           ) : (
             <div className="grid gap-3">
               {question.options.map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => onAnswer(question.dimension, opt.value)}
+                  onClick={() => onAnswer([{ dimension: question.dimension, value: opt.value }])}
                   className="w-full py-4 px-5 text-left rounded-xl border-2 border-wood-400 bg-cream text-ink font-medium hover:border-wood-800 hover:bg-wood-400/10 transition-all shadow-sm text-lg"
                 >
                   {opt.label}

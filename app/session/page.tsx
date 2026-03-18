@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { sessionReducer, initialState } from "@/lib/session-reducer";
 import { getNextQuestion, applyAnswer } from "@/lib/decision-engine";
 import { getCachedGames, setCachedGames } from "@/lib/cache";
-import type { BGGCollectionItem, Game, LoadingProgress } from "@/types/game";
+import type { Answer, BGGCollectionItem, Game, LoadingProgress } from "@/types/game";
 import LoadingScreen from "@/components/LoadingScreen";
 import QuestionCard from "@/components/QuestionCard";
 import ResultScreen from "@/components/ResultScreen";
@@ -139,9 +139,12 @@ function SessionContent() {
     loadCollection();
   }, [loadCollection]);
 
-  const handleAnswer = (dimension: Parameters<typeof applyAnswer>[1], value: string) => {
-    const remaining = applyAnswer(state.remaining, dimension, value);
-    dispatch({ type: "ANSWER_GIVEN", answer: { dimension, value }, remaining });
+  const handleAnswer = (answers: Answer[]) => {
+    let remaining = state.remaining;
+    for (const answer of answers) {
+      remaining = applyAnswer(remaining, answer.dimension, answer.value);
+    }
+    dispatch({ type: "ANSWER_GIVEN", answers, remaining });
   };
 
   const handleReset = () => router.push("/");
