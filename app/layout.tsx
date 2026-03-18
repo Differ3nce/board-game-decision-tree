@@ -14,8 +14,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
-        <footer className="fixed bottom-3 right-3 z-50">
+        <div className="pb-14">{children}</div>
+        <footer className="fixed bottom-3 right-3 z-10">
           <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
