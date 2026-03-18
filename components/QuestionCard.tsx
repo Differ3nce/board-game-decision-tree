@@ -8,6 +8,7 @@ interface Props {
   question: Question;
   remaining: number;
   onAnswer: (answers: Answer[]) => void;
+  onShowGames: () => void;
 }
 
 function formatMinutes(min: number): string {
@@ -21,9 +22,11 @@ function formatMinutes(min: number): string {
 function SliderQuestion({
   question,
   onAnswer,
+  onShowGames,
 }: {
   question: Question;
   onAnswer: (answers: Answer[]) => void;
+  onShowGames: () => void;
 }) {
   const cfg = question.sliderConfig!;
   const [value, setValue] = useState(cfg.defaultValue);
@@ -61,6 +64,44 @@ function SliderQuestion({
       >
         That works for me!
       </button>
+      <SkipFooter
+        dimension={question.dimension}
+        onAnswer={onAnswer}
+        onShowGames={onShowGames}
+      />
+    </div>
+  );
+}
+
+function SkipFooter({
+  dimension,
+  onAnswer,
+  onShowGames,
+  hideSkip = false,
+}: {
+  dimension: QuestionDimension;
+  onAnswer: (answers: Answer[]) => void;
+  onShowGames: () => void;
+  hideSkip?: boolean;
+}) {
+  return (
+    <div className="flex justify-between items-center pt-1">
+      {!hideSkip ? (
+        <button
+          onClick={() => onAnswer([{ dimension, value: "__skip__" }])}
+          className="text-sm text-ink/50 hover:text-ink/80 transition-colors"
+        >
+          No preference
+        </button>
+      ) : (
+        <span />
+      )}
+      <button
+        onClick={onShowGames}
+        className="text-sm text-wood-600 hover:text-wood-800 font-medium transition-colors"
+      >
+        See remaining games →
+      </button>
     </div>
   );
 }
@@ -68,9 +109,11 @@ function SliderQuestion({
 function MultiMechanicQuestion({
   question,
   onAnswer,
+  onShowGames,
 }: {
   question: Question;
   onAnswer: (answers: Answer[]) => void;
+  onShowGames: () => void;
 }) {
   const [selections, setSelections] = useState<Record<string, "love" | "hate" | null>>({});
 
@@ -132,11 +175,16 @@ function MultiMechanicQuestion({
       >
         Continue
       </button>
+      <SkipFooter
+        dimension={question.dimension}
+        onAnswer={onAnswer}
+        onShowGames={onShowGames}
+      />
     </div>
   );
 }
 
-export default function QuestionCard({ question, remaining, onAnswer }: Props) {
+export default function QuestionCard({ question, remaining, onAnswer, onShowGames }: Props) {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream">
       <AnimatePresence mode="wait">
@@ -158,9 +206,9 @@ export default function QuestionCard({ question, remaining, onAnswer }: Props) {
           </div>
 
           {question.type === "slider" ? (
-            <SliderQuestion question={question} onAnswer={onAnswer} />
+            <SliderQuestion question={question} onAnswer={onAnswer} onShowGames={onShowGames} />
           ) : question.type === "mechanic-multi" ? (
-            <MultiMechanicQuestion question={question} onAnswer={onAnswer} />
+            <MultiMechanicQuestion question={question} onAnswer={onAnswer} onShowGames={onShowGames} />
           ) : (
             <div className="grid gap-3">
               {question.options.map((opt) => (
@@ -172,6 +220,12 @@ export default function QuestionCard({ question, remaining, onAnswer }: Props) {
                   {opt.label}
                 </button>
               ))}
+              <SkipFooter
+                dimension={question.dimension}
+                onAnswer={onAnswer}
+                onShowGames={onShowGames}
+                hideSkip={question.options.some((o) => o.value.startsWith("__skip__"))}
+              />
             </div>
           )}
         </motion.div>

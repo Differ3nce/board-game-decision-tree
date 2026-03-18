@@ -103,5 +103,6 @@ export type SessionAction =
   | { type: "COLLECTION_LOADED"; games: Game[] }
   | { type: "ANSWER_GIVEN"; answers: Answer[]; remaining: Game[] }
   | { type: "SHOW_RESULT" }
+  | { type: "BACK_TO_QUESTIONS" }
   | { type: "SET_ERROR"; error: string }
   | { type: "RESET" };

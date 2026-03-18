@@ -4,9 +4,10 @@ import GameCard from "./GameCard";
 interface Props {
   games: Game[];
   onReset: () => void;
+  onBackToQuestions?: () => void;
 }
 
-export default function ResultScreen({ games, onReset }: Props) {
+export default function ResultScreen({ games, onReset, onBackToQuestions }: Props) {
   const isSingle = games.length === 1;
 
   return (
@@ -27,6 +28,14 @@ export default function ResultScreen({ games, onReset }: Props) {
           ))}
         </div>
 
+        {onBackToQuestions && (
+          <button
+            onClick={onBackToQuestions}
+            className="w-full py-3 bg-wood-600 text-cream font-semibold rounded-lg hover:bg-wood-800 transition-colors"
+          >
+            ← Back to questions
+          </button>
+        )}
         <button
           onClick={onReset}
           className="w-full py-3 border-2 border-wood-400 text-wood-800 font-semibold rounded-lg hover:bg-wood-400/10 transition-colors"
