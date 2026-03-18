@@ -34,10 +34,11 @@ function applyOptionFilter(
 function questionScore(q: Question, games: Game[]): number {
   // Slider questions: sample several values to find the best achievable split
   if (q.type === "slider" && q.sliderConfig) {
-    const { min, max, step } = q.sliderConfig;
+    const { min, max, step, range } = q.sliderConfig;
     let best = 0;
     for (let v = min; v <= max; v += step * 4) {
-      const filtered = applyFilter(games, q.dimension, String(v));
+      const value = range ? `${min}:${v}` : String(v);
+      const filtered = applyFilter(games, q.dimension, value);
       best = Math.max(best, splitScore(filtered.length, games.length));
     }
     return best;
@@ -96,20 +97,21 @@ function buildPlayTimeQuestion(games: Game[]): Question | null {
   const maxTime = Math.max(...times);
   if (maxTime - minTime < 30) return null; // no meaningful spread to filter on
 
-  // Default slider position: average play time of collection, rounded to 15 min
+  // Default range: 30 min to average play time of collection (rounded to 15 min)
   const avgTime =
     games
       .filter((g) => g.maxPlayTime > 0 || g.minPlayTime > 0)
       .reduce((sum, g) => sum + (g.minPlayTime + (g.maxPlayTime || g.minPlayTime)) / 2, 0) /
     Math.max(1, games.filter((g) => g.maxPlayTime > 0 || g.minPlayTime > 0).length);
-  const defaultValue = Math.round(Math.min(Math.max(avgTime, 30), 300) / 15) * 15;
+  const defaultMax = Math.round(Math.min(Math.max(avgTime, 45), 300) / 15) * 15;
+  const defaultMin = 30;
 
   return {
     dimension: "playTime",
     text: "How long do you want to play?",
     options: [],
     type: "slider",
-    sliderConfig: { min: 30, max: 300, step: 15, defaultValue },
+    sliderConfig: { min: 30, max: 300, step: 15, defaultValue: defaultMax, range: true, defaultMin, defaultMax },
   };
 }
 

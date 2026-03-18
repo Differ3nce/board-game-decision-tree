@@ -12,17 +12,14 @@ export function filterByPlayerCount(games: Game[], count: number): Game[] {
 }
 
 /**
- * Filter games by a target play duration in minutes.
- * A game fits if its play-time range overlaps the target (±30% tolerance).
+ * Filter games whose play-time range overlaps the user's desired range (with 20% tolerance).
  */
-export function filterByPlayTime(games: Game[], targetMinutes: number): Game[] {
+export function filterByPlayTime(games: Game[], userMin: number, userMax: number): Game[] {
   return games.filter((g) => {
     const gMin = g.minPlayTime || 0;
     const gMax = g.maxPlayTime || g.minPlayTime || 0;
     if (gMin === 0 && gMax === 0) return true; // unknown play time always passes
-    // Game's max should be within 130% of target (won't drag on forever)
-    // Game's min should be at least 40% of target (won't be trivially short)
-    return gMin <= targetMinutes * 1.3 && gMax >= targetMinutes * 0.4;
+    return gMax >= userMin * 0.8 && gMin <= userMax * 1.2;
   });
 }
 
@@ -93,8 +90,10 @@ export function applyFilter(
   switch (dimension) {
     case "playerCount":
       return filterByPlayerCount(games, parseInt(value, 10));
-    case "playTime":
-      return filterByPlayTime(games, parseFloat(value));
+    case "playTime": {
+      const [minStr, maxStr] = value.includes(":") ? value.split(":") : [value, value];
+      return filterByPlayTime(games, parseFloat(minStr), parseFloat(maxStr));
+    }
     case "complexity":
       return filterByComplexity(games, value);
     case "mechanic":

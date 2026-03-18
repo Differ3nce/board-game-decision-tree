@@ -56,6 +56,9 @@ export interface SliderConfig {
   step: number;
   defaultValue: number;
   format?: "minutes" | "count";
+  range?: boolean;
+  defaultMin?: number;
+  defaultMax?: number;
 }
 
 export interface Question {

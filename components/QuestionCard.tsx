@@ -65,6 +65,77 @@ function SliderQuestion({
   );
 }
 
+function RangeSliderQuestion({
+  question,
+  onAnswer,
+}: {
+  question: Question;
+  onAnswer: (answers: Answer[]) => void;
+}) {
+  const cfg = question.sliderConfig!;
+  const [minVal, setMinVal] = useState(cfg.defaultMin ?? cfg.min);
+  const [maxVal, setMaxVal] = useState(cfg.defaultMax ?? cfg.max);
+
+  const handleMinChange = (v: number) => setMinVal(Math.min(v, maxVal - cfg.step));
+  const handleMaxChange = (v: number) => setMaxVal(Math.max(v, minVal + cfg.step));
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <span className="text-4xl font-bold text-wood-800">
+          {formatMinutes(minVal)} — {formatMinutes(maxVal)}
+        </span>
+      </div>
+
+      <div className="space-y-5 px-1">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-ink/60">
+            <span>From</span>
+            <span className="font-semibold text-ink">{formatMinutes(minVal)}</span>
+          </div>
+          <input
+            type="range"
+            min={cfg.min}
+            max={cfg.max}
+            step={cfg.step}
+            value={minVal}
+            onChange={(e) => handleMinChange(Number(e.target.value))}
+            className="w-full h-2 rounded-full accent-wood-600 cursor-pointer"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-ink/60">
+            <span>To</span>
+            <span className="font-semibold text-ink">{formatMinutes(maxVal)}</span>
+          </div>
+          <input
+            type="range"
+            min={cfg.min}
+            max={cfg.max}
+            step={cfg.step}
+            value={maxVal}
+            onChange={(e) => handleMaxChange(Number(e.target.value))}
+            className="w-full h-2 rounded-full accent-wood-600 cursor-pointer"
+          />
+        </div>
+
+        <div className="flex justify-between text-sm text-ink/40">
+          <span>{formatMinutes(cfg.min)}</span>
+          <span>{formatMinutes(cfg.max)}</span>
+        </div>
+      </div>
+
+      <button
+        onClick={() => onAnswer([{ dimension: question.dimension, value: `${minVal}:${maxVal}` }])}
+        className="w-full py-4 px-5 rounded-xl bg-wood-600 text-cream font-semibold text-lg hover:bg-wood-800 transition-all shadow-sm"
+      >
+        That works for me!
+      </button>
+    </div>
+  );
+}
+
 function MultiMechanicQuestion({
   question,
   onAnswer,
@@ -157,7 +228,9 @@ export default function QuestionCard({ question, remaining, onAnswer }: Props) {
             </h2>
           </div>
 
-          {question.type === "slider" ? (
+          {question.type === "slider" && question.sliderConfig?.range ? (
+            <RangeSliderQuestion question={question} onAnswer={onAnswer} />
+          ) : question.type === "slider" ? (
             <SliderQuestion question={question} onAnswer={onAnswer} />
           ) : question.type === "mechanic-multi" ? (
             <MultiMechanicQuestion question={question} onAnswer={onAnswer} />
