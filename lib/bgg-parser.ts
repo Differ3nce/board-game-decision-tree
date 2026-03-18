@@ -1,6 +1,25 @@
 import { XMLParser } from "fast-xml-parser";
 import type { BGGCollectionItem, Game } from "@/types/game";
 
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'",
+  nbsp: "\u00A0", mdash: "\u2014", ndash: "\u2013", hellip: "\u2026",
+  ldquo: "\u201C", rdquo: "\u201D", lsquo: "\u2018", rsquo: "\u2019",
+  eacute: "\u00E9", egrave: "\u00E8", ecirc: "\u00EA", euml: "\u00EB",
+  aacute: "\u00E1", agrave: "\u00E0", acirc: "\u00E2", auml: "\u00E4", atilde: "\u00E3",
+  oacute: "\u00F3", ograve: "\u00F2", ocirc: "\u00F4", ouml: "\u00F6",
+  uacute: "\u00FA", ugrave: "\u00F9", ucirc: "\u00FB", uuml: "\u00FC",
+  iacute: "\u00ED", igrave: "\u00EC", icirc: "\u00EE", iuml: "\u00EF",
+  ntilde: "\u00F1", ccedil: "\u00E7", szlig: "\u00DF",
+};
+
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&#x([0-9a-fA-F]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
+    .replace(/&([a-z]+);/gi, (match, name) => NAMED_ENTITIES[name.toLowerCase()] ?? match);
+}
+
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "_",
@@ -15,13 +34,14 @@ function ensureHttps(url: string | undefined): string {
 }
 
 function parseName(nameField: unknown): string {
-  if (typeof nameField === "string") return nameField;
-  if (typeof nameField === "object" && nameField !== null) {
+  let raw = "";
+  if (typeof nameField === "string") raw = nameField;
+  else if (typeof nameField === "object" && nameField !== null) {
     const obj = nameField as Record<string, unknown>;
-    if (typeof obj["#text"] === "string") return obj["#text"];
-    if (typeof obj["_value"] === "string") return obj["_value"];
+    if (typeof obj["#text"] === "string") raw = obj["#text"];
+    else if (typeof obj["_value"] === "string") raw = obj["_value"];
   }
-  return "";
+  return decodeHtmlEntities(raw);
 }
 
 function parseFloat2(val: unknown): number | undefined {
@@ -174,7 +194,7 @@ export function parseGameDetails(
           (l as Record<string, unknown>)._type === "boardgamemechanic"
       )
       .map((l) =>
-        String((l as Record<string, unknown>)._value)
+        decodeHtmlEntities(String((l as Record<string, unknown>)._value))
       );
     const categories = links
       .filter(
@@ -182,7 +202,7 @@ export function parseGameDetails(
           (l as Record<string, unknown>)._type === "boardgamecategory"
       )
       .map((l) =>
-        String((l as Record<string, unknown>)._value)
+        decodeHtmlEntities(String((l as Record<string, unknown>)._value))
       );
 
     const stats = item.statistics as Record<string, unknown> | undefined;
@@ -197,8 +217,7 @@ export function parseGameDetails(
       ) ?? col.communityRating;
 
     const rawDescription = typeof item.description === "string" ? item.description : "";
-    const description = rawDescription
-      .replace(/&#(\d+);/g, (_, n: string) => String.fromCharCode(Number(n)))
+    const description = decodeHtmlEntities(rawDescription)
       .replace(/<[^>]*>/g, "")
       .replace(/\s+/g, " ")
       .trim();
